@@ -1,0 +1,63 @@
+name: Self-Hosted CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    # Exécute le workflow sur ton runner auto-hébergé (Windows)
+    runs-on: self-hosted
+
+    steps:
+    # 1️⃣ Récupération du dépôt
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # 2️⃣ Vérification de la version de Node.js
+    - name: Log Node.js version
+      run: node --version
+
+    # 3️⃣ Vérification de l'espace disque disponible
+    - name: Log available disk space
+      shell: powershell
+      run: |
+        Write-Output "Checking available disk space:"
+        Get-PSDrive -PSProvider 'FileSystem' | ForEach-Object {
+          "{0}: {1:N2} GB free / {2:N2} GB total" -f $_.Name, ($_.Free/1GB), ($_.Used/1GB + $_.Free/1GB)
+        }
+
+    # 4️⃣ Installation des dépendances
+    - name: Install dependencies
+      run: npm ci
+
+    # 5️⃣ Exécution des tests unitaires
+    - name: Run tests
+      run: npm test -- --watch=false --browsers=ChromeHeadless --no-progress
+
+    # 6️⃣ Nettoyage (cache npm, logs temporaires, etc.)
+    - name: Cleanup
+      shell: powershell
+      run: |
+        Write-Output "Cleaning up temporary files and npm cache..."
+        try {
+          npm cache clean --force
+          if (Test-Path "C:\Users\delta\AppData\Local\Temp") {
+            Remove-Item -Path "C:\Users\delta\AppData\Local\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+          }
+          Write-Output "Cleanup completed successfully."
+        } catch {
+          Write-Output "Cleanup failed: $($_.Exception.Message)"
+        }
+
+    # 7️⃣ Vérification de l'espace disque après le nettoyage
+    - name: Post-cleanup disk check
+      shell: powershell
+      run: |
+        Write-Output "Disk space after cleanup:"
+        Get-PSDrive -PSProvider 'FileSystem' | ForEach-Object {
+          "{0}: {1:N2} GB free / {2:N2} GB total" -f $_.Name, ($_.Free/1GB), ($_.Used/1GB + $_.Free/1GB)
+        }
