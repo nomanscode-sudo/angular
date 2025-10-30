@@ -26,4 +26,4 @@ jobs:
       run: npm ci --legacy-peer-deps
 
     - name: Run tests
-      run: npm test -- --watch=false --browsers=ChromeHeadless --no-progress
+      run: npm test -- --watch=false --browsers=EdgeHeadless --no-progress
