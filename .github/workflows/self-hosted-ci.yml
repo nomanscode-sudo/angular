@@ -1,4 +1,3 @@
-
 name: Self-Hosted CI
 
 on:
@@ -6,10 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  # Ajout d'un déclencheur manuel pour faciliter les tests
   workflow_dispatch:
 
 jobs:
   build-and-test:
+    # Spécifie d'utiliser votre runner auto-hébergé au lieu des runners GitHub
     runs-on: self-hosted
 
     steps:
@@ -19,10 +20,10 @@ jobs:
     - name: Log Node.js version
       run: node --version
 
-    # ÉTAPE SUPPRIMÉE - pas critique pour le TP
+    # ÉTAPE SUPPRIMÉE - pas critique pour le TP (df -h ne marche pas sur Windows)
     
     - name: Install dependencies
-      run: npm install
+      run: npm ci --legacy-peer-deps
 
     - name: Run tests
       run: npm test -- --watch=false --browsers=ChromeHeadless --no-progress
