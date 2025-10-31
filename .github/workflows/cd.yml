@@ -4,7 +4,7 @@ on:
   # Déclenché manuellement ou après un merge sur main
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   # Job de construction de l'image
